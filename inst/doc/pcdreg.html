@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Regression analysis of panel count data</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Regression analysis of panel count
+data</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(pcdreg)</span></code></pre></div>
+<div id="the-data-and-the-model" class="section level2">
+<h2>The data and the model</h2>
+<p>Panel count data arise when a recurrent event process is observed at
+periodic examinations. Each visit gives the number of events since the
+previous visit, but not their event times. Examples include
+hospitalisations counted at quarterly clinic visits, tumours counted at
+scheduled sacrifices, and insurance claims tallied at renewal.</p>
+<p>Write <span class="math inline">\(N_i(t)\)</span> for the number of
+events subject <span class="math inline">\(i\)</span> has experienced by
+time <span class="math inline">\(t\)</span>, observed at times <span class="math inline">\(T_{i1} &lt; \dots &lt; T_{iJ_i}\)</span>, and
+<span class="math inline">\(\Delta N_{ij}\)</span> for the count in
+<span class="math inline">\((T_{i,j-1}, T_{ij}]\)</span>.
+<code>pcdreg()</code> fits the proportional rate model</p>
+<p><span class="math display">\[E[dN(t) \mid X(t)] = \exp(\beta&#39;
+X(t)) \, d\Lambda(t),\]</span></p>
+<p>where <span class="math inline">\(\Lambda\)</span> is an unspecified
+non-decreasing baseline cumulative rate and <span class="math inline">\(X(t)\)</span> may vary over time.</p>
+<p>The proportional <em>means</em> model is <span class="math inline">\(E[N(t) \mid X(t)] =
+\mu(t)\exp(\beta&#39;X(t))\)</span>. It requires <span class="math inline">\(\mu\)</span> to be non-decreasing. With covariates
+that fluctuate over time, this condition is difficult to arrange and
+interpret: a fitted means model can predict a declining mean count. The
+rate model requires only <span class="math inline">\(\exp(\beta&#39;X(t))\,d\Lambda(t)\)</span> to be
+positive. Predicted means therefore increase automatically, and <span class="math inline">\(\exp(\beta&#39;X(t))\)</span> has the
+instantaneous relative-risk interpretation of a hazard ratio in survival
+analysis.</p>
+<p>The means model is the established alternative. The package also fits
+it with <code>pcdreg(model = &quot;mean&quot;)</code>. The last section compares
+the models.</p>
+</div>
+<div id="getting-data-into-shape" class="section level2">
+<h2>Getting data into shape</h2>
+<p><code>pcd()</code> constructs the response. It plays the same role as
+<code>Surv()</code> in survival analysis and has two forms.</p>
+<p>When covariates do not change over time, one row per examination is
+enough:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>visits <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="at">id    =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="at">time  =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">1.1</span>, <span class="fl">1.9</span>, <span class="fl">0.7</span>, <span class="fl">1.4</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">count =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">4</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">dose  =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">25</span>, <span class="dv">25</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">pcd</span>(visits<span class="sc">$</span>id, visits<span class="sc">$</span>time, visits<span class="sc">$</span>count)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; [1] 1: (0.0, 0.5] 2 1: (0.5, 1.1] 0 1: (1.1, 1.9] 3 2: (0.0, 0.7] 1</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; [5] 2: (0.7, 1.4] 4</span></span></code></pre></div>
+<p>Interval starts are filled in from the previous examination of the
+same subject, with follow-up beginning at zero.</p>
+<p>When covariates <em>do</em> change over time, use the counting
+process form: one row per interval with constant covariates. This is the
+layout <code>coxph()</code> uses for time-dependent covariates. A
+numeric <code>count</code> records an examination at <code>tstop</code>.
+An <code>NA</code> <code>count</code> records a covariate change
+only.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>cp <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="at">id     =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>),</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="at">tstart =</span> <span class="fu">c</span>(<span class="fl">0.0</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>, <span class="fl">0.0</span>),</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="at">tstop  =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.9</span>, <span class="fl">1.2</span>, <span class="fl">0.8</span>),</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="at">count  =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">0</span>, <span class="dv">3</span>),</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="at">dose   =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">25</span>, <span class="dv">25</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">pcd</span>(cp<span class="sc">$</span>id, cp<span class="sc">$</span>tstart, cp<span class="sc">$</span>tstop, cp<span class="sc">$</span>count)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; [1] 1: (0.0, 0.5] 2 1: (0.5, 0.9] - 1: (0.9, 1.2] 0 2: (0.0, 0.8] 3</span></span></code></pre></div>
+<p>Subject 1 was examined at 0.5 and 1.2, with two events in the first
+interval and none in the second. The dose changed at 0.9, within the
+second interval. The rate model uses this information; the means model
+cannot.</p>
+<p>Within a subject the intervals must be contiguous, start at zero, and
+end at an examination. <code>pcdreg()</code> checks all of this and says
+which subject is at fault when it fails.</p>
+<div id="converting-data-held-in-the-older-layout" class="section level3">
+<h3>Converting data held in the older layout</h3>
+<p>An older layout repeats each panel count on every row of its interval
+and marks examinations with a separate indicator. Convert it in one
+line. A repeated count on a non-examination row carries no information
+beyond the examination row:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>new <span class="ot">&lt;-</span> old</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>new<span class="sc">$</span>count[old<span class="sc">$</span>event <span class="sc">==</span> <span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> new)</span></code></pre></div>
+</div>
+</div>
+<div id="fitting" class="section level2">
+<h2>Fitting</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">sim_pcd</span>(<span class="dv">200</span>, <span class="at">beta =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>), <span class="at">lambda =</span> <span class="cf">function</span>(t) <span class="dv">8</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> t))</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> d)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">summary</span>(fit)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; pcdreg(formula = pcd(id, tstart, tstop, count) ~ x1 + x2, data = d)</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; Proportional rate model for panel count data </span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; Standard errors: robust sandwich</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt;    Estimate Std. Error z value Pr(&gt;|z|)</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; x1  1.10111    0.10693   10.30   &lt;2e-16</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; x2 -1.11478    0.09385  -11.88   &lt;2e-16</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; 200 subjects, 819 examinations, 1601 events, 195 distinct examination times.</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; Log likelihood -1106 in 522 EM iterations.</span></span></code></pre></div>
+<p>There is no intercept: a constant in <span class="math inline">\(X\)</span> would be indistinguishable from a
+rescaling of <span class="math inline">\(\Lambda\)</span>, so
+<code>pcdreg()</code> drops it and reports the baseline separately.</p>
+<p>Fitting maximises the likelihood implied by a nonhomogeneous Poisson
+process. The EM algorithm treats the unobserved per-time counts as
+missing data. This makes the integral <span class="math inline">\(\int
+\exp(\beta&#39;X(t)) d\Lambda(t)\)</span> tractable and requires
+covariates only at observed examination times, not as complete
+trajectories.</p>
+<p>The Poisson likelihood is a working device, not an assumption about
+the data. The estimator stays consistent and asymptotically normal when
+the counts are not Poisson at all.</p>
+</div>
+<div id="which-standard-errors" class="section level2">
+<h2>Which standard errors</h2>
+<p>This distinction matters for the covariance. Three estimators are
+available.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="cf">function</span>(type) <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(fit, type)))</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">robust =</span> <span class="fu">se</span>(<span class="st">&quot;robust&quot;</span>), <span class="at">information =</span> <span class="fu">se</span>(<span class="st">&quot;information&quot;</span>))</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt;                     x1         x2</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; robust      0.10693035 0.09384671</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; information 0.07937988 0.08078999</span></span></code></pre></div>
+<p><code>&quot;robust&quot;</code>, the default, is the sandwich <span class="math inline">\(\Omega^{-1} S \Omega^{-1}/n\)</span> built from
+the two matrices</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>fit<span class="sc">$</span>Omega</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt;             x1          x2</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; x1 -0.60588046  0.06284371</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; x2  0.06284371 -0.67648334</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>fit<span class="sc">$</span>S</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt;            x1         x2</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; x1  0.8597886 -0.2345604</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; x2 -0.2345604  0.8300369</span></span></code></pre></div>
+<p>Both matrices are by-products of the last EM iteration, so the robust
+standard errors are essentially free. The estimator is consistent
+whether or not the counts are Poisson.</p>
+<p><code>&quot;information&quot;</code> is <span class="math inline">\(S^{-1}/n\)</span>. Under the Poisson assumption,
+<span class="math inline">\(S\)</span> is the efficient information and
+this is the right answer. It is also a cheap stand-in for the profile
+likelihood method, with which it agrees closely.</p>
+<p><code>&quot;profile&quot;</code> is the numerical profile likelihood estimator
+of Murphy and van der Vaart. It is included for comparison with the
+literature and is computed only on request because it is expensive:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>pfit <span class="ot">&lt;-</span> <span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> d,</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>                  <span class="at">profile =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">information =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(pfit, <span class="st">&quot;information&quot;</span>))),</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>      <span class="at">profile     =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(pfit, <span class="st">&quot;profile&quot;</span>))))</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt;                     x1         x2</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; information 0.07937988 0.08078999</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; profile     0.08034997 0.07755357</span></span></code></pre></div>
+<p>The two estimates track each other closely, as theory predicts,
+because both estimate <span class="math inline">\(S\)</span>. They
+differ because the profile version uses a numerical derivative with a
+step of order <span class="math inline">\(n^{-1/2}\)</span> and
+therefore has a discretisation error that shrinks only with sample size.
+Prefer <code>&quot;information&quot;</code> when the Poisson assumption is
+tenable. <code>&quot;profile&quot;</code> is mainly provided for comparison with
+the literature.</p>
+<div id="what-happens-when-the-poisson-assumption-fails" class="section level3">
+<h3>What happens when the Poisson assumption fails</h3>
+<p>Real recurrent event data are usually overdispersed: some subjects
+are more event-prone than their covariates suggest. A gamma frailty
+preserves the rate model but destroys the Poisson structure.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>od <span class="ot">&lt;-</span> <span class="fu">sim_pcd</span>(<span class="dv">200</span>, <span class="at">beta =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>), <span class="at">frailty =</span> <span class="dv">1</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>odfit <span class="ot">&lt;-</span> <span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> od)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">robust =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(odfit, <span class="st">&quot;robust&quot;</span>))),</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>      <span class="at">information =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(odfit, <span class="st">&quot;information&quot;</span>))))</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt;                     x1         x2</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; robust      0.26146233 0.28237814</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; information 0.04003442 0.03288915</span></span></code></pre></div>
+<p>The information-based standard errors are several times too small.
+The paper’s simulations put coverage of the resulting nominal 95%
+intervals around 15–22%. For this reason, <code>&quot;robust&quot;</code> is the
+default and other choices require care.</p>
+</div>
+</div>
+<div id="the-baseline-and-predicted-means" class="section level2">
+<h2>The baseline and predicted means</h2>
+<p><code>baseline()</code> returns the estimated jumps and the
+cumulative baseline rate.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">baseline</span>(fit))</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 6 × 3</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt;    time     jump cumrate</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; 1  0.01 1.21e- 1   0.121</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; 2  0.02 0          0.121</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; 3  0.03 0          0.121</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; 4  0.04 1.36e-46   0.121</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; 5  0.05 4.66e- 1   0.587</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; 6  0.06 0          0.587</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>truth <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">time =</span> fit<span class="sc">$</span>baseline<span class="sc">$</span>time,</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>                    <span class="at">value =</span> <span class="dv">8</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> fit<span class="sc">$</span>baseline<span class="sc">$</span>time))</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="fu">autoplot</span>(fit) <span class="sc">+</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(<span class="at">data =</span> truth, <span class="at">colour =</span> <span class="st">&quot;#c0392b&quot;</span>, <span class="at">linetype =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" alt="Estimated cumulative baseline rate rising with time, with the true curve overlaid as a dashed red line and closely tracking it." /></p>
+<p>The dashed line is the truth, <span class="math inline">\(\Lambda(t)
+= 8\log(1+t)\)</span>.</p>
+<p>Predicted mean counts follow each subject’s covariate trajectory,
+<span class="math inline">\(E[N(t) \mid X] = \int_0^t
+\exp(\beta&#39;X(s)) \, d\hat\Lambda(s)\)</span>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, d, <span class="at">type =</span> <span class="st">&quot;mean&quot;</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">head</span>(pred)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt; # A tibble: 6 × 3</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt;   id     time  mean</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; 1 1      0.01 0.155</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; 2 1      0.02 0.155</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; 3 1      0.03 0.155</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt; 4 1      0.04 0.155</span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt; 5 1      0.05 0.755</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt; 6 1      0.06 0.755</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>one <span class="ot">&lt;-</span> pred[pred<span class="sc">$</span>id <span class="sc">==</span> <span class="dv">1</span>, ]</span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(one, ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> mean)) <span class="sc">+</span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_step</span>(<span class="at">colour =</span> <span class="st">&quot;#2a78d6&quot;</span>, <span class="at">linewidth =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Time&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Predicted mean count&quot;</span>, <span class="at">title =</span> <span class="st">&quot;Subject 1&quot;</span>) <span class="sc">+</span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">11</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" alt="Predicted mean count for one subject as a step function, rising monotonically over follow-up." /></p>
+<p>The curve is non-decreasing even though <code>x1</code> changes part
+way through follow-up. This is a structural advantage of the rate
+model.</p>
+</div>
+<div id="tidy-output" class="section level2">
+<h2>Tidy output</h2>
+<p><code>tidy()</code>, <code>glance()</code> and <code>augment()</code>
+methods are provided for the broom generics.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">tidy</span>(fit, <span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 2 × 7</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt;   term  estimate std.error statistic  p.value conf.low conf.high</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; 1 x1        1.10    0.107       10.3 7.24e-25    0.892     1.31 </span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; 2 x2       -1.11    0.0938     -11.9 1.53e-32   -1.30     -0.931</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="fu">glance</span>(fit)</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 8</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt;   model                         n nexam nevent ngrid logLik iterations converged</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;                     &lt;int&gt; &lt;int&gt;  &lt;dbl&gt; &lt;int&gt;  &lt;dbl&gt;      &lt;dbl&gt; &lt;lgl&gt;    </span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt; 1 Proportional rate model …   200   819   1601   195 -1106.        522 TRUE</span></span></code></pre></div>
+<p><code>exponentiate = TRUE</code> reports <span class="math inline">\(e^{\beta}\)</span>, the multiplicative effect on
+the rate, read as a hazard ratio is read.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">tidy</span>(fit, <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">exponentiate =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 2 × 7</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">#&gt;   term  estimate std.error statistic  p.value conf.low conf.high</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#&gt; 1 x1       3.01     0.107       10.3 7.24e-25    2.44      3.71 </span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt; 2 x2       0.328    0.0938     -11.9 1.53e-32    0.273     0.394</span></span></code></pre></div>
+<p><code>augment()</code> attaches the fitted mean to each row, together
+with the observed cumulative count and their difference.
+<code>.resid</code> is the excess of events seen so far over the number
+the model implies, so it is the quantity to plot against time or against
+a covariate when checking fit.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>aug <span class="ot">&lt;-</span> <span class="fu">augment</span>(fit)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">head</span>(aug[<span class="sc">!</span><span class="fu">is.na</span>(aug<span class="sc">$</span>.observed),</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>         <span class="fu">c</span>(<span class="st">&quot;id&quot;</span>, <span class="st">&quot;tstop&quot;</span>, <span class="st">&quot;.fitted&quot;</span>, <span class="st">&quot;.observed&quot;</span>, <span class="st">&quot;.resid&quot;</span>)])</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co">#&gt; # A tibble: 6 × 5</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co">#&gt;      id tstop .fitted .observed .resid</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">#&gt;   &lt;int&gt; &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co">#&gt; 1     1  0.38    3.39         1 -2.39 </span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co">#&gt; 2     1  1.07    7.25         4 -3.25 </span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co">#&gt; 3     1  1.7    10.2          8 -2.25 </span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co">#&gt; 4     2  0.21    2.33         2 -0.329</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co">#&gt; 5     2  0.8     5.96         4 -1.96 </span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co">#&gt; 6     2  1.25    8.57         4 -4.57</span></span></code></pre></div>
+</div>
+<div id="the-means-model" class="section level2">
+<h2>The means model</h2>
+<p><code>pcdreg(model = &quot;mean&quot;)</code> fits the other classical model
+for these data,</p>
+<p><span class="math display">\[E[N(t) \mid X(t)] =
+\mu(t)\exp(\beta&#39;X(t)),\]</span></p>
+<p>by the estimating equation of Hu, Sun and Wei (2003). It is the
+comparator in the paper’s application. It is inexpensive because only
+examination times enter; the grid expansion required by the rate model
+is unnecessary.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>mfit <span class="ot">&lt;-</span> <span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> d, <span class="at">model =</span> <span class="st">&quot;mean&quot;</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">summary</span>(mfit)</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="co">#&gt; pcdreg(formula = pcd(id, tstart, tstop, count) ~ x1 + x2, data = d, </span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="co">#&gt;     model = &quot;mean&quot;)</span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co">#&gt; Proportional means model for panel count data </span></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co">#&gt; Standard errors: robust sandwich</span></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co">#&gt;    Estimate Std. Error z value Pr(&gt;|z|)</span></span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="co">#&gt; x1  0.53845    0.09857   5.463 4.69e-08</span></span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="co">#&gt; x2 -1.04802    0.10824  -9.682  &lt; 2e-16</span></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="co">#&gt; 200 subjects, 819 examinations, 1601 events, 195 distinct examination times.</span></span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="co">#&gt; Converged in 4 Newton iterations.</span></span></code></pre></div>
+<p>There is no likelihood behind this estimator, so there is no log
+likelihood to report and <code>vcov()</code> offers only the
+sandwich.</p>
+<p>The two fits require care in interpretation.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">cbind</span>(<span class="at">rate =</span> <span class="fu">coef</span>(fit), <span class="at">mean =</span> <span class="fu">coef</span>(mfit))</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co">#&gt;         rate       mean</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="co">#&gt; x1  1.101105  0.5384467</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co">#&gt; x2 -1.114778 -1.0480179</span></span></code></pre></div>
+<p>These numbers do not estimate one quantity. With time-varying
+covariates, the models are not reparametrisations of each other: <span class="math inline">\(\beta\)</span> acts on the instantaneous rate in
+one and the cumulative mean in the other. They answer different
+questions and need not agree. These data were generated from the rate
+model, so <code>pcdreg()</code> recovers the simulation values and
+<code>pcdreg(model = &quot;mean&quot;)</code> does not.</p>
+<p>Second, nothing constrains the fitted <span class="math inline">\(\hat\mu\)</span> to increase:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fu">baseline</span>(mfit)<span class="sc">$</span>mean</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">c</span>(<span class="at">increasing =</span> <span class="sc">!</span><span class="fu">is.unsorted</span>(mu), <span class="at">decreases_at =</span> <span class="fu">sum</span>(<span class="fu">diff</span>(mu) <span class="sc">&lt;</span> <span class="dv">0</span>))</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="co">#&gt;   increasing decreases_at </span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="co">#&gt;            0           96</span></span></code></pre></div>
+<p>This is the difficulty that the package’s rate model addresses. It
+appears in ordinary simulated data. A declining mean function is not a
+numerical failure. It is the estimator’s result when covariate values
+move up and down. Predicted means from
+<code>pcdreg(model = &quot;mean&quot;)</code> can therefore decrease, while those
+from <code>pcdreg()</code> cannot.</p>
+</div>
+<div id="computation" class="section level2">
+<h2>Computation</h2>
+<p>The EM algorithm converges linearly and slowly on this problem: plain
+EM can still be changing in the fifth decimal place after tens of
+thousands of passes. <code>pcdreg()</code> extrapolates the iterations
+with the SQUAREM scheme of Varadhan and Roland. An extrapolated point is
+kept only if a stabilising EM pass from it does at least as well on the
+observed-data log likelihood. The fixed point is unchanged. The required
+number of passes typically falls by an order of magnitude.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">c</span>(<span class="at">iterations =</span> fit<span class="sc">$</span>iterations, <span class="at">EM_passes =</span> fit<span class="sc">$</span>passes,</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>  <span class="at">converged =</span> fit<span class="sc">$</span>converged)</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="co">#&gt; iterations  EM_passes  converged </span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="co">#&gt;        522       1567          1</span></span></code></pre></div>
+<p>Set <code>accelerate = FALSE</code> in <code>pcdreg_control()</code>
+to recover plain EM.</p>
+<p>The dominant cost is the pooled grid of distinct examination times.
+The covariate trajectory for every subject is evaluated at every grid
+time within follow-up. Tied examination times across subjects, as with
+scheduled visits, keep the grid small.</p>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<p>Sun, D., Guo, Y., Li, Y., Tu, W. and Sun, J. (2024). A robust
+approach for regression analysis of panel count data. <em>Bernoulli</em>
+<strong>30</strong>(4), 3251–3275. <a href="https://doi.org/10.3150/23-BEJ1713">doi:10.3150/23-BEJ1713</a></p>
+<p>Hu, X. J., Sun, J. and Wei, L. J. (2003). Regression parameter
+estimation from panel counts. <em>Scandinavian Journal of
+Statistics</em> <strong>30</strong>(1), 25–43. <a href="https://doi.org/10.1111/1467-9469.00316">doi:10.1111/1467-9469.00316</a></p>
+<p>Varadhan, R. and Roland, C. (2008). Simple and globally convergent
+methods for accelerating the convergence of any EM algorithm.
+<em>Scandinavian Journal of Statistics</em> <strong>35</strong>,
+335–353.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

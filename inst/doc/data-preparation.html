@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Preparing data and specifying the model</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Preparing data and specifying the
+model</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(pcdreg)</span></code></pre></div>
+<p>Data preparation is most of the work in fitting these models, and
+most mistakes occur here. This vignette describes the inputs required by
+the two fitters, formula specification, conversion from common layouts,
+and the error messages.</p>
+<div id="what-panel-count-data-is" class="section level1">
+<h1>What panel count data is</h1>
+<p>A subject is examined at times <span class="math inline">\(T_{i1}
+&lt; \dots &lt; T_{iJ_i}\)</span>. Each examination gives the number of
+events since the previous examination, but not their times. Two
+quantities are easy to confuse:</p>
+<ul>
+<li><span class="math inline">\(\Delta N_{ij}\)</span>, the
+<strong>increment</strong> — events in <span class="math inline">\((T_{i,j-1}, T_{ij}]\)</span>;</li>
+<li><span class="math inline">\(N_i(T_{ij})\)</span>, the
+<strong>cumulative</strong> count — events up to <span class="math inline">\(T_{ij}\)</span>.</li>
+</ul>
+<p><strong><code>pcdreg</code> always wants the increment.</strong> If
+your data records cumulative counts, difference them first; there is a
+recipe below. Passing cumulative counts is not an error the package can
+detect, and it will quietly give you the wrong answer.</p>
+</div>
+<div id="the-response" class="section level1">
+<h1>The response</h1>
+<p><code>pcd()</code> builds the left-hand side of the formula, as
+<code>Surv()</code> does for survival models. Choose its form according
+to one question: <strong>do any covariates change value during
+follow-up?</strong></p>
+<div id="no-time-varying-covariates-one-row-per-examination" class="section level2">
+<h2>No time-varying covariates: one row per examination</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>visits <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="at">id    =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="at">time  =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">1.1</span>, <span class="fl">1.9</span>, <span class="fl">0.7</span>, <span class="fl">1.4</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">count =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">4</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">age   =</span> <span class="fu">c</span>(<span class="dv">24</span>, <span class="dv">24</span>, <span class="dv">24</span>, <span class="dv">31</span>, <span class="dv">31</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="at">arm   =</span> <span class="fu">c</span>(<span class="st">&quot;drug&quot;</span>, <span class="st">&quot;drug&quot;</span>, <span class="st">&quot;drug&quot;</span>, <span class="st">&quot;placebo&quot;</span>, <span class="st">&quot;placebo&quot;</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="fu">pcd</span>(visits<span class="sc">$</span>id, visits<span class="sc">$</span>time, visits<span class="sc">$</span>count)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; [1] 1: (0.0, 0.5] 2 1: (0.5, 1.1] 0 1: (1.1, 1.9] 3 2: (0.0, 0.7] 1</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; [5] 2: (0.7, 1.4] 4</span></span></code></pre></div>
+<p>Interval starts come from each subject’s previous examination, with
+follow-up beginning at zero. The printed intervals show this. Subject 1
+contributes <span class="math inline">\((0, 0.5]\)</span>, <span class="math inline">\((0.5, 1.1]\)</span> and <span class="math inline">\((1.1, 1.9]\)</span> with 2, 0 and 3 events. Fit
+the model with</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, time, count) <span class="sc">~</span> age <span class="sc">+</span> arm, <span class="at">data =</span> visits)</span></code></pre></div>
+<p>but not with these five rows and two subjects: <code>age</code> and
+<code>arm</code> are perfectly confounded, so the information matrix is
+singular. Later examples use real fits.</p>
+</div>
+<div id="time-varying-covariates-counting-process-rows" class="section level2">
+<h2>Time-varying covariates: counting process rows</h2>
+<p>When a covariate changes between examinations, use one row for each
+interval with constant covariates. This is the layout
+<code>coxph()</code> uses for time-dependent covariates.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>cp <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="at">id     =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="at">tstart =</span> <span class="fu">c</span>(<span class="fl">0.0</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>, <span class="fl">0.0</span>),</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="at">tstop  =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.9</span>, <span class="fl">1.2</span>, <span class="fl">0.8</span>),</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="at">count  =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">0</span>, <span class="dv">3</span>),</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="at">dose   =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">25</span>, <span class="dv">25</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="fu">pcd</span>(cp<span class="sc">$</span>id, cp<span class="sc">$</span>tstart, cp<span class="sc">$</span>tstop, cp<span class="sc">$</span>count)</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; [1] 1: (0.0, 0.5] 2 1: (0.5, 0.9] - 1: (0.9, 1.2] 0 2: (0.0, 0.8] 3</span></span></code></pre></div>
+<p>Subject 1 was examined at 0.5 with 2 events and at 1.2 with none. The
+dose changed from 10 to 25 at time 0.9, within the second examination
+interval.</p>
+<p>The <code>count</code> field distinguishes the two row types:</p>
+<ul>
+<li>a <strong>number</strong> means “this row ends at an examination,
+and this many events happened since the previous examination”;</li>
+<li><strong><code>NA</code></strong> means “this row ends at a covariate
+change, not an examination”.</li>
+</ul>
+<p>There is no separate event indicator.</p>
+</div>
+<div id="which-form-in-one-line" class="section level2">
+<h2>Which form, in one line</h2>
+<p>Use the three argument form when every covariate is fixed at
+baseline. Use the four argument form as soon as a covariate changes.
+When in doubt, use the four argument form. It can express anything the
+three argument form can.</p>
+</div>
+</div>
+<div id="the-formula" class="section level1">
+<h1>The formula</h1>
+<p>The right-hand side is an ordinary model formula.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2          <span class="co"># main effects</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">*</span> x2          <span class="co"># interaction</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> <span class="fu">log</span>(x2)     <span class="co"># transformation</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> <span class="fu">factor</span>(site)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> .                <span class="co"># everything else</span></span></code></pre></div>
+<p>Factors are expanded with your contrast settings, and
+<code>predict()</code> reuses the coding the fit used.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">sim_pcd</span>(<span class="dv">60</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>d<span class="sc">$</span>site <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="st">&quot;north&quot;</span>, <span class="st">&quot;south&quot;</span>, <span class="st">&quot;east&quot;</span>)[<span class="dv">1</span> <span class="sc">+</span> d<span class="sc">$</span>id <span class="sc">%%</span> <span class="dv">3</span>])</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> site, <span class="at">data =</span> d)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">coef</span>(fit))</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;x1&quot;        &quot;sitenorth&quot; &quot;sitesouth&quot;</span></span></code></pre></div>
+<p>The dot expands to every column outside the response, so
+<code>id</code>, <code>tstart</code>, <code>tstop</code> and
+<code>count</code> are excluded automatically:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">coef</span>(<span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> ., <span class="at">data =</span> d)))</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;x1&quot;        &quot;x2&quot;        &quot;sitenorth&quot; &quot;sitesouth&quot;</span></span></code></pre></div>
+<div id="there-is-no-intercept" class="section level2">
+<h2>There is no intercept</h2>
+<p>A constant column cannot be told apart from a rescaling of the
+baseline function, so both fitters drop the intercept and report the
+baseline separately through <code>baseline()</code>. Writing
+<code>~ x1 + x2 - 1</code> changes nothing, and adding <code>+ 0</code>
+is unnecessary.</p>
+<p>Adding a constant <span class="math inline">\(c\)</span> to a
+covariate leaves <span class="math inline">\(\beta\)</span> unchanged
+and rescales the baseline by <span class="math inline">\(e^{-c\beta}\)</span>. Centring covariates changes
+the baseline, not the coefficients.</p>
+</div>
+<div id="row-order-does-not-matter" class="section level2">
+<h2>Row order does not matter</h2>
+<p>Data are sorted internally by subject and time, so
+<code>arrange()</code> is unnecessary. Subject identifiers need not be
+integers or consecutive. Numbers, characters, and factors all work;
+<code>predict(type = &quot;mean&quot;)</code> returns the original labels.</p>
+</div>
+</div>
+<div id="recipes-for-common-layouts" class="section level1">
+<h1>Recipes for common layouts</h1>
+<div id="cumulative-counts" class="section level2">
+<h2>Cumulative counts</h2>
+<p>This is the most common and damaging mismatch. If <code>count</code>
+accumulates, difference it within subject before fitting.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># A frame whose counts accumulate: 2, 2, 5 rather than 2, 0, 3.</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>cumdat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">id    =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>),</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">time  =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">1.1</span>, <span class="fl">1.9</span>, <span class="fl">0.7</span>, <span class="fl">1.4</span>),</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">count =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">1</span>, <span class="dv">5</span>),</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="at">age   =</span> <span class="fu">c</span>(<span class="dv">24</span>, <span class="dv">24</span>, <span class="dv">24</span>, <span class="dv">31</span>, <span class="dv">31</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>)</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>cumdat<span class="sc">$</span>increment <span class="ot">&lt;-</span> <span class="fu">ave</span>(cumdat<span class="sc">$</span>count, cumdat<span class="sc">$</span>id,</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>                        <span class="at">FUN =</span> <span class="cf">function</span>(v) v <span class="sc">-</span> <span class="fu">c</span>(<span class="dv">0</span>, v[<span class="sc">-</span><span class="fu">length</span>(v)]))</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>cumdat[, <span class="fu">c</span>(<span class="st">&quot;id&quot;</span>, <span class="st">&quot;time&quot;</span>, <span class="st">&quot;count&quot;</span>, <span class="st">&quot;increment&quot;</span>)]</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt;   id time count increment</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; 1  1  0.5     2         2</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; 2  1  1.1     2         0</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; 3  1  1.9     5         3</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt; 4  2  0.7     1         1</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt; 5  2  1.4     5         4</span></span></code></pre></div>
+<p>Then fit with <code>increment</code>. With <code>NA</code>s on
+covariate-change rows, difference only the examination rows:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>at <span class="ot">&lt;-</span> <span class="sc">!</span><span class="fu">is.na</span>(dat<span class="sc">$</span>count)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>dat<span class="sc">$</span>count[at] <span class="ot">&lt;-</span> <span class="fu">ave</span>(dat<span class="sc">$</span>count[at], dat<span class="sc">$</span>id[at],</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>                     <span class="at">FUN =</span> <span class="cf">function</span>(v) v <span class="sc">-</span> <span class="fu">c</span>(<span class="dv">0</span>, v[<span class="sc">-</span><span class="fu">length</span>(v)]))</span></code></pre></div>
+</div>
+<div id="data-held-in-the-older-panelem-layout" class="section level2">
+<h2>Data held in the older <code>panelEM</code> layout</h2>
+<p>This layout repeats each panel count on every row of its interval and
+marks examinations with a separate indicator. A repeated count carries
+no information beyond the examination row, so conversion takes one
+line:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>new <span class="ot">&lt;-</span> old</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>new<span class="sc">$</span>count[old<span class="sc">$</span>event <span class="sc">==</span> <span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> new)</span></code></pre></div>
+</div>
+<div id="examinations-and-covariate-histories-in-separate-tables" class="section level2">
+<h2>Examinations and covariate histories in separate tables</h2>
+<p>If visits and covariate changes are in separate tables, stack them
+and carry covariates forward. Examination rows retain their counts;
+covariate-change rows receive <code>NA</code>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>exams <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">id =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">time =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">1.2</span>), <span class="at">count =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">0</span>))</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>covar <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">id =</span> <span class="dv">1</span>, <span class="at">time =</span> <span class="fl">0.9</span>, <span class="at">dose =</span> <span class="dv">25</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>start <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">id =</span> <span class="dv">1</span>, <span class="at">time =</span> <span class="dv">0</span>, <span class="at">dose =</span> <span class="dv">10</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>both <span class="ot">&lt;-</span> <span class="fu">merge</span>(</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">id =</span> <span class="fu">c</span>(exams<span class="sc">$</span>id, covar<span class="sc">$</span>id), <span class="at">tstop =</span> <span class="fu">c</span>(exams<span class="sc">$</span>time, covar<span class="sc">$</span>time),</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>             <span class="at">count =</span> <span class="fu">c</span>(exams<span class="sc">$</span>count, <span class="cn">NA</span>)),</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>  <span class="fu">rbind</span>(start[, <span class="fu">c</span>(<span class="st">&quot;id&quot;</span>, <span class="st">&quot;time&quot;</span>, <span class="st">&quot;dose&quot;</span>)], covar[, <span class="fu">c</span>(<span class="st">&quot;id&quot;</span>, <span class="st">&quot;time&quot;</span>, <span class="st">&quot;dose&quot;</span>)]),</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>  <span class="at">by.x =</span> <span class="fu">c</span>(<span class="st">&quot;id&quot;</span>, <span class="st">&quot;tstop&quot;</span>), <span class="at">by.y =</span> <span class="fu">c</span>(<span class="st">&quot;id&quot;</span>, <span class="st">&quot;time&quot;</span>), <span class="at">all.x =</span> <span class="cn">TRUE</span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>)</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>both <span class="ot">&lt;-</span> both[<span class="fu">order</span>(both<span class="sc">$</span>id, both<span class="sc">$</span>tstop), ]</span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>both<span class="sc">$</span>dose <span class="ot">&lt;-</span> <span class="fu">ave</span>(both<span class="sc">$</span>dose, both<span class="sc">$</span>id,</span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>                 <span class="at">FUN =</span> <span class="cf">function</span>(v) { <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(v))</span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>                   <span class="cf">if</span> (<span class="fu">is.na</span>(v[i]) <span class="sc">&amp;&amp;</span> i <span class="sc">&gt;</span> <span class="dv">1</span>) v[i] <span class="ot">&lt;-</span> v[i <span class="sc">-</span> <span class="dv">1</span>]; v })</span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>both<span class="sc">$</span>tstart <span class="ot">&lt;-</span> <span class="fu">ave</span>(both<span class="sc">$</span>tstop, both<span class="sc">$</span>id,</span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>                   <span class="at">FUN =</span> <span class="cf">function</span>(v) <span class="fu">c</span>(<span class="dv">0</span>, v[<span class="sc">-</span><span class="fu">length</span>(v)]))</span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>both[, <span class="fu">c</span>(<span class="st">&quot;id&quot;</span>, <span class="st">&quot;tstart&quot;</span>, <span class="st">&quot;tstop&quot;</span>, <span class="st">&quot;count&quot;</span>, <span class="st">&quot;dose&quot;</span>)]</span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt;   id tstart tstop count dose</span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co">#&gt; 1  1    0.0   0.5     2   NA</span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="co">#&gt; 2  1    0.5   0.9    NA   25</span></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co">#&gt; 3  1    0.9   1.2     0   25</span></span></code></pre></div>
+</div>
+<div id="one-row-per-subject-several-visit-columns" class="section level2">
+<h2>One row per subject, several visit columns</h2>
+<p>Reshape wide data to long first with <code>stats::reshape()</code> or
+<code>tidyr::pivot_longer()</code>. Use one row per subject and visit,
+then the three argument form.</p>
+</div>
+</div>
+<div id="what-the-data-must-satisfy" class="section level1">
+<h1>What the data must satisfy</h1>
+<p>Both fitters perform these checks before arithmetic and identify the
+offending subject when a check fails.</p>
+<p><strong>Follow-up starts at zero.</strong> The models integrate from
+0, so the first interval of every subject must begin there.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>bad <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">id =</span> <span class="dv">1</span>, <span class="at">tstart =</span> <span class="fl">0.2</span>, <span class="at">tstop =</span> <span class="dv">1</span>, <span class="at">count =</span> <span class="dv">3</span>, <span class="at">x =</span> <span class="dv">1</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x, <span class="at">data =</span> bad)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; Error in `prepare_panel()`:</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; ! Follow-up must start at time 0.</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; ✖ Subject &quot;1&quot; starts at 0.2.</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; ℹ Shift the time scale so that 0 is the start of follow-up.</span></span></code></pre></div>
+<p>For calendar dates, or follow-up starting at enrolment, subtract each
+subject’s own origin first.</p>
+<p><strong>Intervals are contiguous.</strong> Within a subject each
+interval must begin exactly where the previous one ended: no gaps, no
+overlaps.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>bad <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">id =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">tstart =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.7</span>), <span class="at">tstop =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="dv">1</span>),</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>                  <span class="at">count =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>), <span class="at">x =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x, <span class="at">data =</span> bad)</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co">#&gt; Error in `prepare_panel()`:</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#&gt; ! Intervals within a subject must be contiguous.</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt; ✖ Subject &quot;1&quot; has a gap or overlap at time 0.7.</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt; ℹ Carry the last covariate value forward rather than leaving the stretch out.</span></span></code></pre></div>
+<p>A gap usually indicates a covariate history that does not cover all
+follow-up. Carry the last value forward instead of omitting the
+interval.</p>
+<p><strong>Every subject has at least one examination.</strong> A
+subject with <code>count</code> equal to <code>NA</code> on every row
+contributes nothing and is more likely a data error than an intentional
+record.</p>
+<p><strong>Counts are non-negative whole numbers.</strong>
+<code>pcd()</code> refuses other values. This catches rates and averages
+passed by mistake.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">pcd</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">1.2</span>))</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co">#&gt; Error in `pcd()`:</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co">#&gt; ! `count` must be a non-negative whole number at examination times.</span></span></code></pre></div>
+<p><strong>One row per subject may end at any given time.</strong>
+Duplicate rows at the same subject and time are rejected instead of
+silently combined.</p>
+<div id="what-gets-dropped" class="section level2">
+<h2>What gets dropped</h2>
+<p>Follow-up ends at a subject’s last examination. The likelihood runs
+over <span class="math inline">\(j = 1, \dots, J_i\)</span> and has no
+information beyond <span class="math inline">\(T_{iJ_i}\)</span>. Rows
+wholly after that time are dropped, with a message reporting how
+many.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># A censoring row appended after subject 1&#39;s final visit.</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>last1 <span class="ot">&lt;-</span> <span class="fu">max</span>(d<span class="sc">$</span>tstop[d<span class="sc">$</span>id <span class="sc">==</span> <span class="dv">1</span>])</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>trailing <span class="ot">&lt;-</span> <span class="fu">transform</span>(d[d<span class="sc">$</span>id <span class="sc">==</span> <span class="dv">1</span>, ][<span class="dv">1</span>, ],</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>                      <span class="at">tstart =</span> last1, <span class="at">tstop =</span> last1 <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">count =</span> <span class="cn">NA</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>fit2 <span class="ot">&lt;-</span> <span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2,</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>                  <span class="at">data =</span> <span class="fu">rbind</span>(d, trailing))</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co">#&gt; Dropping 1 row beyond the last examination of their subject.</span></span></code></pre></div>
+<p>The usual cause is a censoring row appended after the last visit.
+This is harmless: the interval contains no information.</p>
+</div>
+<div id="missing-values" class="section level2">
+<h2>Missing values</h2>
+<p>Missing covariates are handled by <code>na.action</code>, which by
+default deletes rows — and deleting a row in the middle of a subject
+breaks contiguity, so you will get the gap error rather than a silently
+different fit. Resolve missing covariates before fitting, by carrying
+values forward or by dropping whole subjects.</p>
+</div>
+</div>
+<div id="what-the-package-does-with-your-rows" class="section level1">
+<h1>What the package does with your rows</h1>
+<p>This processing explains the error messages.</p>
+<p>The pooled grid <span class="math inline">\(t_1 &lt; \dots &lt;
+t_K\)</span> contains all distinct examination times. For the
+<strong>rate model</strong>, each subject’s covariate trajectory is
+evaluated at each grid time during follow-up. The complete, contiguous
+trajectory is therefore required. The <strong>means model</strong> uses
+only each subject’s examination times and is much cheaper.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> d)</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">c</span>(<span class="at">subjects =</span> fit<span class="sc">$</span>n, <span class="at">examinations =</span> fit<span class="sc">$</span>nexam,</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>  <span class="at">grid_times =</span> fit<span class="sc">$</span>ngrid, <span class="at">events =</span> fit<span class="sc">$</span>nevent)</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co">#&gt;     subjects examinations   grid_times       events </span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="co">#&gt;           60          235          139          487</span></span></code></pre></div>
+<p>Ties across subjects reduce the grid, which drives the rate model’s
+cost. Examination times recorded to the day or week tie naturally. Times
+kept at full numerical precision do not, so the grid grows with sample
+size. Round to the precision at which visits were scheduled.</p>
+</div>
+<div id="checking-before-you-fit" class="section level1">
+<h1>Checking before you fit</h1>
+<p>These quantities are a quick sanity check. <code>nexam</code> should
+equal the expected number of examinations, and <code>nevent</code> the
+total number of events. An unexpectedly large <code>nevent</code>
+usually indicates cumulative counts.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">c</span>(<span class="at">rows_supplied =</span> <span class="fu">nrow</span>(d),</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>  <span class="at">examination_rows =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(d<span class="sc">$</span>count)),</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  <span class="at">events =</span> <span class="fu">sum</span>(d<span class="sc">$</span>count, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="co">#&gt;    rows_supplied examination_rows           events </span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="co">#&gt;              283              235              487</span></span></code></pre></div>
+</div>
+<div id="see-also" class="section level1">
+<h1>See also</h1>
+<p><code>vignette(&quot;pcdreg&quot;)</code> for the models themselves, the choice
+of covariance estimator, and the comparison between the rate and means
+models.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

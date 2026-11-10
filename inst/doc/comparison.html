@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Where pcdreg fits among R packages for panel count data</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Where pcdreg fits among R packages for
+panel count data</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(pcdreg)</span></code></pre></div>
+<p>This article describes the settings in which <code>pcdreg</code> and
+the available alternatives apply.</p>
+<div id="the-landscape" class="section level1">
+<h1>The landscape</h1>
+<p>Three classes of R package address recurrent event data. They are not
+interchangeable.</p>
+<p><strong>Exactly observed event times.</strong> If you know
+<em>when</em> each event happened, <code>reReg</code>,
+<code>survival</code>, and the recurrent-event literature apply. The
+discussion below concerns panel count data, where only the number of
+events between visits is known.</p>
+<p><strong><code>spef</code></strong>, by Chiou, Wang and Yan, is the
+established R package for panel count data. It offers a wide range of
+estimators through one function,
+<code>panelReg(formula, data, method = ...)</code>. These include
+augmented estimating equations for an informative observation process
+(<code>AEE</code>, <code>AEEX</code>), maximum pseudolikelihood and
+monotone spline likelihood methods (<code>MPL</code>, <code>MPLs</code>,
+<code>MLs</code>), the Sun–Wei and Hu–Sun–Wei estimating equations, and
+an accelerated mean model. Its response is
+<code>PanelSurv(ID, time, count)</code>, one row per examination. All of
+these methods target the <strong>mean</strong> model. At the time of
+writing, <code>spef</code> is archived on CRAN — since June 2026, for an
+undeliverable maintainer address rather than anything to do with the
+code — so it installs from the archive rather than from
+<code>install.packages()</code>.</p>
+<p><strong><code>pcdreg</code></strong> fits the rate and mean models
+with time-varying covariates. Its covariance estimate does not rely on a
+Poisson assumption.</p>
+</div>
+<div id="what-is-actually-different" class="section level1">
+<h1>What is actually different</h1>
+<div id="the-rate-model" class="section level2">
+<h2>The rate model</h2>
+<p>This is the substantive distinction. The means model constrains the
+<em>cumulative</em> count; the rate model constrains the
+<em>instantaneous</em> count. With time-varying covariates, these are
+different models. They are not two parametrisations of one, and has a
+different meaning in each.</p>
+<p>Simulate from the rate model with a covariate that steps part way
+through follow-up, and fit both:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">sim_pcd</span>(<span class="dv">300</span>, <span class="at">beta =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>), <span class="at">lambda =</span> <span class="cf">function</span>(t) <span class="dv">8</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> t))</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>rate <span class="ot">&lt;-</span> <span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> d)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>mean <span class="ot">&lt;-</span> <span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> d,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>               <span class="at">model =</span> <span class="st">&quot;mean&quot;</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">cbind</span>(<span class="at">truth =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>), <span class="at">rate =</span> <span class="fu">coef</span>(rate), <span class="at">mean =</span> <span class="fu">coef</span>(mean)), <span class="dv">3</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt;    truth   rate   mean</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; x1     1  1.004  0.517</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; x2    -1 -1.074 -1.036</span></span></code></pre></div>
+<p>The rate model recovers the values used to generate the data. The
+means model does not, and it is not meant to: it is estimating a
+different quantity. If your scientific question is about the
+instantaneous risk — the analogue of a hazard ratio — then only the
+first column of estimates answers it, and a package offering mean models
+alone cannot produce it.</p>
+<p>If the question concerns cumulative burden by time , the means model
+is appropriate. <code>pcdreg(model = &quot;mean&quot;)</code> and
+<code>spef</code>’s <code>EE.HSWc</code> are the same estimator.</p>
+</div>
+<div id="monotonicity" class="section level2">
+<h2>Monotonicity</h2>
+<p>There is a practical consequence. Nothing constrains a fitted mean
+function to increase, and with a fluctuating covariate it generally does
+not:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fu">baseline</span>(mean)<span class="sc">$</span>mean</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">c</span>(<span class="at">increasing =</span> <span class="sc">!</span><span class="fu">is.unsorted</span>(mu), <span class="at">decreases_at =</span> <span class="fu">sum</span>(<span class="fu">diff</span>(mu) <span class="sc">&lt;</span> <span class="dv">0</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt;   increasing decreases_at </span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt;            0           92</span></span></code></pre></div>
+<p>A mean function that falls is not a numerical failure; it is what the
+estimator returns, and it makes the fitted model awkward to interpret
+and to predict from. The rate model has no such problem, because it
+constrains only to be positive, so predicted means increase by
+construction:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>pr <span class="ot">&lt;-</span> <span class="fu">predict</span>(rate, d, <span class="at">type =</span> <span class="st">&quot;mean&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">all</span>(<span class="fu">vapply</span>(<span class="fu">split</span>(pr<span class="sc">$</span>mean, pr<span class="sc">$</span>id), <span class="cf">function</span>(v) <span class="fu">all</span>(<span class="fu">diff</span>(v) <span class="sc">&gt;=</span> <span class="dv">0</span>), <span class="fu">logical</span>(<span class="dv">1</span>)))</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+<p>Some <code>spef</code> methods fit with monotone I-splines, so the
+<em>baseline</em> increases by construction. This resolves half the
+problem. The fitted mean for a subject can still decline when their
+covariates decline.</p>
+</div>
+<div id="covariates-between-examinations" class="section level2">
+<h2>Covariates between examinations</h2>
+<p>The rate-model likelihood evaluates each subject’s covariate
+trajectory at every pooled examination time during follow-up, including
+times at which <em>that</em> subject was not examined. A
+<code>PanelSurv(ID, time, count)</code> response has one row per
+examination and cannot record a covariate value when the subject was not
+seen. The counting-process form of <code>pcd()</code> can:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">subset</span>(d, id <span class="sc">==</span> <span class="dv">1</span>), <span class="dv">4</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 4 × 6</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt;      id tstart tstop count    x1    x2</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt;   &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; 1     1   0     0.38     1 0.898 0.661</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; 2     1   0.38  1.07     3 0.898 0.661</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; 3     1   1.07  1.26    NA 0.898 0.661</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; 4     1   1.26  1.7      4 0.945 0.661</span></span></code></pre></div>
+<p>Row 3 has <code>count = NA</code>, recording a covariate change at
+that time, not an examination. The rate model needs this information.
+The one-row-per-examination layout cannot carry it.</p>
+</div>
+<div id="variance-without-the-poisson-assumption" class="section level2">
+<h2>Variance without the Poisson assumption</h2>
+<p>The rate-model likelihood is the likelihood of a Poisson process. It
+is a working device, not a claim about the data. Recurrent event data
+are usually overdispersed, so standard errors that assume Poisson counts
+are far too small. <code>pcdreg</code> reports a robust sandwich by
+default:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>od <span class="ot">&lt;-</span> <span class="fu">sim_pcd</span>(<span class="dv">300</span>, <span class="at">beta =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>), <span class="at">frailty =</span> <span class="dv">1</span>)  <span class="co"># gamma frailty</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>odfit <span class="ot">&lt;-</span> <span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, tstart, tstop, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> od)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">rbind</span>(<span class="at">robust      =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(odfit, <span class="st">&quot;robust&quot;</span>))),</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>            <span class="at">information =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(odfit, <span class="st">&quot;information&quot;</span>)))), <span class="dv">4</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt;                 x1     x2</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; robust      0.2017 0.2152</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; information 0.0335 0.0295</span></span></code></pre></div>
+<p>The paper’s simulations put coverage of nominal 95% intervals built
+from the second row at 15–22%. Both estimators are available; the robust
+estimator is the default.</p>
+</div>
+</div>
+<div id="seeing-the-data-first" class="section level1">
+<h1>Seeing the data first</h1>
+<p><code>pcdreg</code> also plots the observation pattern:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">autoplot</span>(<span class="fu">with</span>(d, <span class="fu">pcd</span>(id, tstart, tstop, count)), <span class="at">max_subjects =</span> <span class="dv">40</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt; Showing 40 of 300 subjects.</span></span></code></pre></div>
+<p><img src="data:image/png;base64,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" alt="Panel count data drawn as tiles: one row per subject, one tile per examination interval spanning the time it covers, shaded from pale to dark with the number of events recorded in that interval." /></p>
+<p>Two features of this plot affect the analysis. Alignment of
+examination times across subjects determines the pooled-grid size and
+the cost of fitting the rate model. The raggedness of the right edge
+shows how much of the baseline tail rests on a handful of subjects.</p>
+</div>
+<div id="how-long-they-take" class="section level1">
+<h1>How long they take</h1>
+<p>Speed is worth measuring, and worth measuring on the question you
+actually ask of a fitted model. A point estimate on its own is rarely
+the end of an analysis.</p>
+<p>The comparison below uses time-invariant covariates. That is not a
+simplification for convenience: <code>PanelSurv(ID, time, count)</code>
+has one row per examination and cannot express a covariate that changes
+during follow-up, so this is the only ground on which the two packages
+fit the same data. Counts are generated exactly, since with fixed
+covariates the increments are independent Poisson with mean .</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>sim_fixed <span class="ot">&lt;-</span> <span class="cf">function</span>(n, <span class="at">beta =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>), <span class="at">tau =</span> <span class="dv">2</span>, <span class="at">exam_mean =</span> <span class="dv">4</span>) {</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  Lambda <span class="ot">&lt;-</span> <span class="cf">function</span>(t) <span class="dv">8</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> t)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">seq_len</span>(n), <span class="cf">function</span>(i) {</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>    nexam <span class="ot">&lt;-</span> <span class="fu">max</span>(1L, <span class="fu">rpois</span>(<span class="dv">1</span>, exam_mean))</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>    exams <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">unique</span>(<span class="fu">round</span>(<span class="fu">runif</span>(nexam, <span class="dv">0</span>, <span class="fu">runif</span>(<span class="dv">1</span>, <span class="fl">0.9</span> <span class="sc">*</span> tau, tau)), <span class="dv">2</span>)))</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>    exams <span class="ot">&lt;-</span> exams[exams <span class="sc">&gt;</span> <span class="dv">0</span>]</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>    x1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>); x2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>    mu <span class="ot">&lt;-</span> <span class="fu">diff</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">Lambda</span>(exams))) <span class="sc">*</span> <span class="fu">exp</span>(beta[<span class="dv">1</span>] <span class="sc">*</span> x1 <span class="sc">+</span> beta[<span class="dv">2</span>] <span class="sc">*</span> x2)</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>    <span class="fu">data.frame</span>(<span class="at">id =</span> i, <span class="at">time =</span> exams, <span class="at">count =</span> <span class="fu">rpois</span>(<span class="fu">length</span>(exams), mu),</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>               <span class="at">x1 =</span> x1, <span class="at">x2 =</span> x2)</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  }))</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>}</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">sim_fixed</span>(<span class="dv">200</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co"># pcdreg: the standard error comes back with the fit.</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="fu">system.time</span>({</span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">pcdreg</span>(<span class="fu">pcd</span>(id, time, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> d, <span class="at">model =</span> <span class="st">&quot;mean&quot;</span>)</span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>  <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(f, <span class="st">&quot;robust&quot;</span>)))</span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>})</span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a><span class="co"># spef: a point estimate, then a standard error by resampling.</span></span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a><span class="fu">system.time</span>(<span class="fu">panelReg</span>(<span class="fu">PanelSurv</span>(id, time, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2, d,</span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a>                     <span class="at">method =</span> <span class="st">&quot;EE.HSWc&quot;</span>, <span class="at">se =</span> <span class="st">&quot;NULL&quot;</span>))</span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="fu">system.time</span>(<span class="fu">panelReg</span>(<span class="fu">PanelSurv</span>(id, time, count) <span class="sc">~</span> x1 <span class="sc">+</span> x2, d,</span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a>                     <span class="at">method =</span> <span class="st">&quot;EE.HSWc&quot;</span>, <span class="at">se =</span> <span class="st">&quot;Bootstrap&quot;</span>))</span></code></pre></div>
+<div id="which-standard-errors-are-available" class="section level2">
+<h2>Which standard errors are available</h2>
+<p>The route to a standard error differs by method, and this drives the
+timings more than the estimation does. For the Hu–Sun–Wei estimating
+equations, <code>se = &quot;Sandwich&quot;</code> and <code>se = &quot;Impute&quot;</code>
+both error, leaving the bootstrap:</p>
+<table>
+<colgroup>
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><code>spef</code> method</th>
+<th><code>se = &quot;NULL&quot;</code></th>
+<th><code>&quot;Sandwich&quot;</code></th>
+<th><code>&quot;Impute&quot;</code></th>
+<th><code>&quot;Bootstrap&quot;</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>AEE</code></td>
+<td>no SE</td>
+<td>no SE</td>
+<td>SE</td>
+<td>SE</td>
+</tr>
+<tr class="even">
+<td><code>AEEX</code></td>
+<td>no SE</td>
+<td>SE</td>
+<td>SE</td>
+<td>SE</td>
+</tr>
+<tr class="odd">
+<td><code>EE.HSWc</code></td>
+<td>no SE</td>
+<td>error</td>
+<td>error</td>
+<td>SE</td>
+</tr>
+<tr class="even">
+<td><code>EE.HSWm</code></td>
+<td>no SE</td>
+<td>error</td>
+<td>error</td>
+<td>SE</td>
+</tr>
+<tr class="odd">
+<td><code>MPL</code></td>
+<td>no SE</td>
+<td>error</td>
+<td>error</td>
+<td>SE</td>
+</tr>
+</tbody>
+</table>
+<p><code>pcdreg</code> has no equivalent row. and are by-products of the
+last EM iteration, so <code>vcov()</code> is a pair of small matrix
+inversions on quantities the fit already computed.</p>
+</div>
+<div id="timings" class="section level2">
+<h2>Timings</h2>
+<p>Median of 3 replicates, in seconds.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>bench <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="at">method =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;pcdreg mean&quot;</span>, <span class="st">&quot;pcdreg rate&quot;</span>, <span class="st">&quot;spef AEE&quot;</span>, <span class="st">&quot;spef EE.HSWc&quot;</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>                 <span class="st">&quot;spef EE.HSWm&quot;</span>, <span class="st">&quot;spef MPL&quot;</span>), <span class="at">each =</span> <span class="dv">4</span>, <span class="at">times =</span> <span class="dv">2</span>),</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">framing =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;estimate + SE&quot;</span>, <span class="st">&quot;estimate only&quot;</span>), <span class="at">each =</span> <span class="dv">24</span>),</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">n =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">400</span>), <span class="at">times =</span> <span class="dv">12</span>),</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">seconds =</span> <span class="fu">c</span>(</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>    <span class="fl">0.00</span>, <span class="fl">0.00</span>, <span class="fl">0.00</span>, <span class="fl">0.00</span>,   <span class="fl">0.66</span>, <span class="fl">1.83</span>, <span class="fl">4.84</span>, <span class="fl">7.23</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>    <span class="fl">0.89</span>, <span class="fl">1.65</span>, <span class="fl">3.17</span>, <span class="fl">6.38</span>,   <span class="fl">0.15</span>, <span class="fl">0.35</span>, <span class="fl">0.79</span>, <span class="fl">3.53</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>    <span class="fl">0.45</span>, <span class="fl">0.89</span>, <span class="fl">1.77</span>, <span class="fl">5.23</span>,   <span class="fl">1.57</span>, <span class="fl">2.27</span>, <span class="fl">3.69</span>, <span class="fl">4.98</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>    <span class="fl">0.00</span>, <span class="fl">0.00</span>, <span class="fl">0.00</span>, <span class="fl">0.00</span>,   <span class="fl">0.66</span>, <span class="fl">1.80</span>, <span class="fl">4.89</span>, <span class="fl">7.30</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>    <span class="fl">0.08</span>, <span class="fl">0.11</span>, <span class="fl">0.08</span>, <span class="fl">0.11</span>,   <span class="fl">0.01</span>, <span class="fl">0.03</span>, <span class="fl">0.04</span>, <span class="fl">0.14</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>    <span class="fl">0.01</span>, <span class="fl">0.05</span>, <span class="fl">0.08</span>, <span class="fl">0.19</span>,   <span class="fl">0.04</span>, <span class="fl">0.11</span>, <span class="fl">0.12</span>, <span class="fl">0.24</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  )</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>)</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>  stats<span class="sc">::</span><span class="fu">reshape</span>(bench, <span class="at">idvar =</span> <span class="fu">c</span>(<span class="st">&quot;method&quot;</span>, <span class="st">&quot;framing&quot;</span>), <span class="at">timevar =</span> <span class="st">&quot;n&quot;</span>,</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>                 <span class="at">direction =</span> <span class="st">&quot;wide&quot;</span>),</span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>  <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">&quot;method&quot;</span>, <span class="st">&quot;framing&quot;</span>, <span class="st">&quot;n = 50&quot;</span>, <span class="st">&quot;n = 100&quot;</span>, <span class="st">&quot;n = 200&quot;</span>, <span class="st">&quot;n = 400&quot;</span>),</span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a>  <span class="at">row.names =</span> <span class="cn">FALSE</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">method</th>
+<th align="left">framing</th>
+<th align="right">n = 50</th>
+<th align="right">n = 100</th>
+<th align="right">n = 200</th>
+<th align="right">n = 400</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">pcdreg mean</td>
+<td align="left">estimate + SE</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="left">pcdreg rate</td>
+<td align="left">estimate + SE</td>
+<td align="right">0.66</td>
+<td align="right">1.83</td>
+<td align="right">4.84</td>
+<td align="right">7.23</td>
+</tr>
+<tr class="odd">
+<td align="left">spef AEE</td>
+<td align="left">estimate + SE</td>
+<td align="right">0.89</td>
+<td align="right">1.65</td>
+<td align="right">3.17</td>
+<td align="right">6.38</td>
+</tr>
+<tr class="even">
+<td align="left">spef EE.HSWc</td>
+<td align="left">estimate + SE</td>
+<td align="right">0.15</td>
+<td align="right">0.35</td>
+<td align="right">0.79</td>
+<td align="right">3.53</td>
+</tr>
+<tr class="odd">
+<td align="left">spef EE.HSWm</td>
+<td align="left">estimate + SE</td>
+<td align="right">0.45</td>
+<td align="right">0.89</td>
+<td align="right">1.77</td>
+<td align="right">5.23</td>
+</tr>
+<tr class="even">
+<td align="left">spef MPL</td>
+<td align="left">estimate + SE</td>
+<td align="right">1.57</td>
+<td align="right">2.27</td>
+<td align="right">3.69</td>
+<td align="right">4.98</td>
+</tr>
+<tr class="odd">
+<td align="left">pcdreg mean</td>
+<td align="left">estimate only</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="left">pcdreg rate</td>
+<td align="left">estimate only</td>
+<td align="right">0.66</td>
+<td align="right">1.80</td>
+<td align="right">4.89</td>
+<td align="right">7.30</td>
+</tr>
+<tr class="odd">
+<td align="left">spef AEE</td>
+<td align="left">estimate only</td>
+<td align="right">0.08</td>
+<td align="right">0.11</td>
+<td align="right">0.08</td>
+<td align="right">0.11</td>
+</tr>
+<tr class="even">
+<td align="left">spef EE.HSWc</td>
+<td align="left">estimate only</td>
+<td align="right">0.01</td>
+<td align="right">0.03</td>
+<td align="right">0.04</td>
+<td align="right">0.14</td>
+</tr>
+<tr class="odd">
+<td align="left">spef EE.HSWm</td>
+<td align="left">estimate only</td>
+<td align="right">0.01</td>
+<td align="right">0.05</td>
+<td align="right">0.08</td>
+<td align="right">0.19</td>
+</tr>
+<tr class="even">
+<td align="left">spef MPL</td>
+<td align="left">estimate only</td>
+<td align="right">0.04</td>
+<td align="right">0.11</td>
+<td align="right">0.12</td>
+<td align="right">0.24</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;ggplot2&#39; was built under R version 4.5.2</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="fu">ggplot</span>(bench, <span class="fu">aes</span>(n, seconds, <span class="at">colour =</span> method)) <span class="sc">+</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">1.6</span>) <span class="sc">+</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> framing) <span class="sc">+</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>    <span class="st">&quot;pcdreg mean&quot;</span>  <span class="ot">=</span> <span class="st">&quot;#3987e5&quot;</span>, <span class="st">&quot;pcdreg rate&quot;</span>  <span class="ot">=</span> <span class="st">&quot;#0d366b&quot;</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>    <span class="st">&quot;spef AEE&quot;</span>     <span class="ot">=</span> <span class="st">&quot;#b0aca4&quot;</span>, <span class="st">&quot;spef EE.HSWc&quot;</span> <span class="ot">=</span> <span class="st">&quot;#8a857c&quot;</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>    <span class="st">&quot;spef EE.HSWm&quot;</span> <span class="ot">=</span> <span class="st">&quot;#645f57&quot;</span>, <span class="st">&quot;spef MPL&quot;</span>     <span class="ot">=</span> <span class="st">&quot;#3f3b35&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Subjects&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Median seconds&quot;</span>, <span class="at">colour =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">10</span>) <span class="sc">+</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>())</span></code></pre></div>
+<p><img src="data:image/png;base64,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" alt="Two panels of median run time against sample size. With standard errors included, pcdreg&#39;s mean model is flat at essentially zero while every spef method rises to between 3.5 and 6.4 seconds at n = 400. For point estimates alone the ordering reverses: spef stays under a quarter of a second and pcdreg&#39;s rate model rises to 7.3 seconds." /></p>
+<p>Read the two panels separately, because they reverse.</p>
+<p>For a <strong>point estimate</strong>, <code>spef</code> is faster
+than the rate model and stays under a quarter of a second throughout.
+The rate model is doing nonparametric maximum likelihood by EM over a
+pooled grid, which is more work than solving an estimating equation, and
+it is the only method here that admits time-varying covariates at
+all.</p>
+<p>For an <strong>estimate with a standard error</strong>, the ordering
+changes. <code>pcdreg</code>’s means model returns below timer
+resolution at every sample size, against 3.5 seconds for
+<code>spef</code>’s <code>EE.HSWc</code>, which is the same estimator
+reached by the same estimating equation. The difference is entirely the
+bootstrap. The rate model lands among the <code>spef</code> methods
+rather than behind them: 7.2 seconds at against 6.4 for <code>AEE</code>
+and 5.0 for <code>MPL</code>.</p>
+</div>
+<div id="why-the-rate-model-flattens" class="section level2">
+<h2>Why the rate model flattens</h2>
+<p>Its cost scales with , where is the number of distinct examination
+times pooled across subjects. Here was 119, 169, 195 and 198 as went 50,
+100, 200, 400. Examination times rounded to two decimals on a bounded
+interval cannot keep producing new values, so saturates and the cost
+becomes roughly linear in rather than quadratic. Times carried at full
+numerical precision never tie, grows with , and the same fit becomes
+much more expensive. Rounding to the precision at which visits were
+actually scheduled is worth doing; see
+<code>vignette(&quot;data-preparation&quot;)</code>.</p>
+</div>
+<div id="caveats" class="section level2">
+<h2>Caveats</h2>
+<p>Run times for the rate model vary with the data, not just its size:
+three replicates at took 0.49, 0.66 and 6.59 seconds, since the number
+of EM iterations depends on the sample drawn. The medians above hide
+that spread.</p>
+<p><code>MPL</code> fits a monotone spline baseline and is solving a
+harder problem than the estimating equations, so its timing buys
+something the others do not provide.</p>
+<p>Measured on one Windows 11 machine, R 4.5.1, <code>spef</code> 1.0.9,
+single threaded. Ratios between methods will travel better than the
+absolute numbers.</p>
+</div>
+</div>
+<div id="which-to-use" class="section level1">
+<h1>Which to use</h1>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>If you need</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>the rate model, or covariates that change between visits</td>
+<td><code>pcdreg</code></td>
+</tr>
+<tr class="even">
+<td>standard errors that survive overdispersion</td>
+<td><code>pcdreg</code></td>
+</tr>
+<tr class="odd">
+<td>the mean model with the Hu–Sun–Wei estimating equation</td>
+<td>either; <code>pcdreg</code> returns the standard error with the
+fit</td>
+</tr>
+<tr class="even">
+<td>many refits, as in a simulation or a bootstrap of your own</td>
+<td><code>pcdreg(model = &quot;mean&quot;)</code></td>
+</tr>
+<tr class="odd">
+<td>informative observation or censoring times</td>
+<td><code>spef</code> (<code>AEE</code>, <code>AEEX</code>)</td>
+</tr>
+<tr class="even">
+<td>a monotone spline baseline mean</td>
+<td><code>spef</code> (<code>MPLs</code>, <code>MLs</code>)</td>
+</tr>
+<tr class="odd">
+<td>an accelerated mean model, or the other mean-model estimators</td>
+<td><code>spef</code></td>
+</tr>
+<tr class="even">
+<td>exactly observed event times</td>
+<td>not panel count data; see <code>reReg</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>pcdreg</code> is deliberately narrow. It implements two models
+with covariance estimation worked out and tested. Use <code>spef</code>
+when it provides an estimator you need.</p>
+</div>
+<div id="reference" class="section level1">
+<h1>Reference</h1>
+<p>Sun, D., Guo, Y., Li, Y., Tu, W. and Sun, J. (2024). A robust
+approach for regression analysis of panel count data. <em>Bernoulli</em>
+<strong>30</strong>(4), 3251–3275. <a href="https://doi.org/10.3150/23-BEJ1713">doi:10.3150/23-BEJ1713</a></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

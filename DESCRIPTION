@@ -1,0 +1,53 @@
+Package: pcdreg
+Type: Package
+Title: Semiparametric Regression for Panel Count Data
+Version: 0.1.0
+Authors@R: c(
+    person("Dayu", "Sun", email = "dayusun@iu.edu",
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-7149-3303")),
+    person("Yuanyuan", "Guo", role = "ctb",
+           comment = "co-author of the method paper"),
+    person("Yang", "Li", role = "ctb",
+           comment = "co-author of the method paper"),
+    person("Wanzhu", "Tu", role = "ctb",
+           comment = "co-author of the method paper"),
+    person("Jianguo", "Sun", role = "ctb",
+           comment = "co-author of the method paper")
+  )
+Description: Fits semiparametric regression models to panel count data, that
+    is, to recurrent event processes observed only at intermittent examination
+    times, allowing covariates to be time-varying. The proportional rate model
+    is fitted by nonparametric maximum likelihood through an
+    expectation-maximization algorithm under a working Poisson assumption,
+    while inference does not require that assumption to hold; two
+    computationally inexpensive covariance estimators are provided, a robust
+    sandwich estimator that remains consistent when the Poisson assumption
+    fails and an efficient information estimator that is a fast substitute for
+    profile likelihood when it holds, with the profile likelihood estimator
+    available for comparison. The proportional means model is fitted by the
+    estimating equation of Hu, Sun and Wei (2003)
+    <doi:10.1111/1467-9469.00316>. Methods for the rate model are described in
+    Sun, Guo, Li, Tu and Sun (2024) <doi:10.3150/23-BEJ1713>.
+License: GPL (>= 2)
+Encoding: UTF-8
+Language: en-GB
+Depends: R (>= 4.1.0)
+Imports: Rcpp, cli, generics, ggplot2, rlang, stats, tibble
+LinkingTo: Rcpp, RcppArmadillo
+Suggests: testthat (>= 3.0.0), knitr, rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 7.3.3
+URL: https://github.com/dayusun/pcdreg, https://www.sundayu.me/pcdreg/
+BugReports: https://github.com/dayusun/pcdreg/issues
+Config/testthat/edition: 3
+NeedsCompilation: yes
+Packaged: 2026-10-25 23:38:28 UTC; commi
+Author: Dayu Sun [aut, cre] (ORCID: <https://orcid.org/0000-0002-7149-3303>),
+  Yuanyuan Guo [ctb] (co-author of the method paper),
+  Yang Li [ctb] (co-author of the method paper),
+  Wanzhu Tu [ctb] (co-author of the method paper),
+  Jianguo Sun [ctb] (co-author of the method paper)
+Maintainer: Dayu Sun <dayusun@iu.edu>
+Repository: CRAN
+Date/Publication: 2026-11-10 15:30:02 UTC
